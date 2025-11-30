@@ -1,56 +1,111 @@
 #include <stdio.h>
+#include <stdlib.h>
+#include <time.h>
 
-// Desafio Tetris Stack
-// Tema 3 - Integração de Fila e Pilha
-// Este código inicial serve como base para o desenvolvimento do sistema de controle de peças.
-// Use as instruções de cada nível para desenvolver o desafio.
+// Definição da struct para representar uma peça
+typedef struct {
+    char nome;  // Tipo da peça ('I', 'O', 'T', 'L')
+    int id;     // Identificador único da peça
+} Peca;
 
+// Constantes para a fila circular
+#define MAX_QUEUE 10  // Tamanho máximo da fila (para permitir enqueues)
+
+// Variáveis globais para a fila circular
+Peca queue[MAX_QUEUE];  // Array para armazenar as peças
+int front = 0;          // Índice do início da fila
+int rear = 0;           // Índice do final da fila
+int count = 0;          // Número de elementos na fila
+int next_id = 0;        // Contador para gerar IDs únicos
+
+// Array de tipos de peças para geração aleatória
+char tipos[4] = {'I', 'O', 'T', 'L'};
+
+// Função para gerar uma nova peça automaticamente
+Peca gerarPeca() {
+    Peca novaPeca;
+    novaPeca.nome = tipos[rand() % 4];  // Seleciona um tipo aleatório
+    novaPeca.id = next_id++;             // Atribui um ID único e incrementa o contador
+    return novaPeca;
+}
+
+// Função para inserir uma peça no final da fila (enqueue)
+void enqueue(Peca p) {
+    if (count < MAX_QUEUE) {
+        queue[rear] = p;                 // Insere a peça na posição rear
+        rear = (rear + 1) % MAX_QUEUE;   // Atualiza rear de forma circular
+        count++;                         // Incrementa o contador de elementos
+    } else {
+        printf("Erro: Fila cheia, não é possível inserir nova peça.\n");
+    }
+}
+
+// Função para remover uma peça do início da fila (dequeue)
+void dequeue() {
+    if (count > 0) {
+        // Remove a peça do front (não precisa retornar, apenas remove)
+        front = (front + 1) % MAX_QUEUE;  // Atualiza front de forma circular
+        count--;                          // Decrementa o contador de elementos
+    } else {
+        printf("Erro: Fila vazia, não é possível jogar peça.\n");
+    }
+}
+
+// Função para exibir o estado atual da fila
+void displayQueue() {
+    printf("Fila de peças\n");
+    if (count == 0) {
+        printf("(Fila vazia)\n");
+        return;
+    }
+    // Percorre a fila de front até rear de forma circular
+    for (int i = front; ; i = (i + 1) % MAX_QUEUE) {
+        printf("[%c %d] ", queue[i].nome, queue[i].id);
+        if (i == rear - 1 || (rear == 0 && i == MAX_QUEUE - 1)) break;  // Para quando chegar ao rear
+    }
+    printf("\n");
+}
+
+// Função para inicializar a fila com um número fixo de peças
+void initQueue(int num) {
+    for (int i = 0; i < num; i++) {
+        enqueue(gerarPeca());  // Gera e insere peças na fila
+    }
+}
+
+// Função principal
 int main() {
+    srand(time(NULL));  // Inicializa o gerador de números aleatórios
+    initQueue(5);       // Inicializa a fila com 5 peças
 
-    // 🧩 Nível Novato: Fila de Peças Futuras
-    //
-    // - Crie uma struct Peca com os campos: tipo (char) e id (int).
-    // - Implemente uma fila circular com capacidade para 5 peças.
-    // - Crie funções como inicializarFila(), enqueue(), dequeue(), filaCheia(), filaVazia().
-    // - Cada peça deve ser gerada automaticamente com um tipo aleatório e id sequencial.
-    // - Exiba a fila após cada ação com uma função mostrarFila().
-    // - Use um menu com opções como:
-    //      1 - Jogar peça (remover da frente)
-    //      0 - Sair
-    // - A cada remoção, insira uma nova peça ao final da fila.
+    int opcao;
+    while (1) {
+        displayQueue();  // Exibe o estado da fila antes do menu
+        printf("\nOpções de ação:\n");
+        printf("1 - Jogar peça (dequeue)\n");
+        printf("2 - Inserir nova peça (enqueue)\n");
+        printf("0 - Sair\n");
+        printf("Escolha uma opção: ");
+        scanf("%d", &opcao);
 
-
-
-    // 🧠 Nível Aventureiro: Adição da Pilha de Reserva
-    //
-    // - Implemente uma pilha linear com capacidade para 3 peças.
-    // - Crie funções como inicializarPilha(), push(), pop(), pilhaCheia(), pilhaVazia().
-    // - Permita enviar uma peça da fila para a pilha (reserva).
-    // - Crie um menu com opção:
-    //      2 - Enviar peça da fila para a reserva (pilha)
-    //      3 - Usar peça da reserva (remover do topo da pilha)
-    // - Exiba a pilha junto com a fila após cada ação com mostrarPilha().
-    // - Mantenha a fila sempre com 5 peças (repondo com gerarPeca()).
-
-
-    // 🔄 Nível Mestre: Integração Estratégica entre Fila e Pilha
-    //
-    // - Implemente interações avançadas entre as estruturas:
-    //      4 - Trocar a peça da frente da fila com o topo da pilha
-    //      5 - Trocar os 3 primeiros da fila com as 3 peças da pilha
-    // - Para a opção 4:
-    //      Verifique se a fila não está vazia e a pilha tem ao menos 1 peça.
-    //      Troque os elementos diretamente nos arrays.
-    // - Para a opção 5:
-    //      Verifique se a pilha tem exatamente 3 peças e a fila ao menos 3.
-    //      Use a lógica de índice circular para acessar os primeiros da fila.
-    // - Sempre valide as condições antes da troca e informe mensagens claras ao usuário.
-    // - Use funções auxiliares, se quiser, para modularizar a lógica de troca.
-    // - O menu deve ficar assim:
-    //      4 - Trocar peça da frente com topo da pilha
-    //      5 - Trocar 3 primeiros da fila com os 3 da pilha
-
+        switch (opcao) {
+            case 1:
+                dequeue();  // Remove a peça da frente
+                break;
+            case 2:
+                if (count < MAX_QUEUE) {
+                    enqueue(gerarPeca());  // Insere uma nova peça gerada automaticamente
+                } else {
+                    printf("Fila cheia, não é possível inserir nova peça.\n");
+                }
+                break;
+            case 0:
+                printf("Saindo do programa.\n");
+                exit(0);  // Encerra o programa
+            default:
+                printf("Opção inválida. Tente novamente.\n");
+        }
+    }
 
     return 0;
 }
-
